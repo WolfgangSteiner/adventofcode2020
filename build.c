@@ -11,7 +11,16 @@ int main(int argc, char** argv)
 
     char* file_name = argv[1];
     char cmd[1024];
+    
+    system("mkdir -p bin");
 
-    snprintf(cmd, 1024, "gcc -o %s -Wall -Werror -O2 -IUnity/src %s.c Unity/src/unity.c util.c", file_name, file_name);
-    system(cmd);
+    snprintf(cmd, 1024, "gcc -o bin/%s -Wall -Werror -O2 -IUnity/src %s.c Unity/src/unity.c util.c", file_name, file_name);
+    int result = system(cmd);
+
+    if (result == 0)
+    {
+        snprintf(cmd, 1024, "time bin/%s", file_name);
+        system(cmd);
+    }
+
 }
