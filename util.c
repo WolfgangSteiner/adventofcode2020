@@ -25,6 +25,14 @@ int_array* int_array_new()
     return array;
 }
 
+
+void int_array_free(int_array* array)
+{
+    free(array->values);
+    free(array);
+}
+
+
 void int_array_push_front(int_array* array, int value)
 {
     if (array->size == array->alloc_size)
@@ -66,17 +74,26 @@ void int_array_sort(int_array* array)
 }
 
 
-int int_array_front(int_array* array)
+int int_array_front(const int_array* array)
 {
+    assert(array->size);
     return array->values[0];
 }
 
 
-int int_array_back(int_array* array)
+int int_array_back(const int_array* array)
 {
+    assert(array->size);
     return array->values[array->size - 1];
 }
 
+int int_array_at(const int_array* array, int index)
+{
+    assert(array->size);
+    assert(index >= 0);
+    assert(index < array->size);
+    return array->values[index];
+}
 
 int_array* int_array_read(char* fileName)
 {
@@ -129,4 +146,14 @@ const char* copy_word(char* dst, const char* line)
     }
 }
 
+int chomp(char* str)
+{
+    int length = strlen(str);
+    while (length && str[length - 1] == '\n')
+    {
+        str[length - 1] = '\0';
+        length--;
+    }
 
+    return length;
+}

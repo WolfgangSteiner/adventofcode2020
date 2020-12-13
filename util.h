@@ -17,13 +17,16 @@ typedef struct
 
 void int_array_delete(int_array* array);
 int_array* int_array_new();
+void int_array_free(int_array* array);
 void int_array_push_front(int_array* array, int value);
 void int_array_push_back(int_array* array, int value);
 void int_array_sort(int_array* array);
-int int_array_front(int_array* array);
-int int_array_back(int_array* array);
+int int_array_front(const int_array* array);
+int int_array_back(const int_array* array);
+int int_array_at(const int_array* array, int index);
 int_array* int_array_read(char* fileName);
 void int_array_print(const int_array* array);
 const char* copy_word(char* dst, const char* line);
 
+int chomp(char* str);
 #endif
