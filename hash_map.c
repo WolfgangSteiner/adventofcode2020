@@ -25,6 +25,23 @@ HashMap* hash_map_init(uint32_t capacity)
     return map;
 }
 
+void hash_map_free_bucket(HashMapBucket* bucket)
+{
+    if (bucket->next) hash_map_free_bucket(bucket->next);
+    free(bucket);
+}
+
+void hash_map_free(HashMap* map)
+{
+    for (int i = 0; i < map->capacity; ++i)
+    {
+        HashMapBucket* bucket = map->buckets[i];
+        if (bucket) hash_map_free_bucket(bucket);
+    } 
+
+    free(map->buckets);
+    free(map);
+}
 
 void hash_map_insert(HashMap* map, const char* key, void* value)
 {
@@ -80,9 +97,9 @@ size_t hash_map_next_occupied_bucket_index(const HashMap* map, size_t startIndex
 }
 
 
-void hash_map_iterator_begin(const HashMap* map, HashMapIterator* iter)
+HashMapIterator* hash_map_iterator_begin(const HashMap* map)
 {
-    memset(iter, 0, sizeof(HashMapIterator));
+    HashMapIterator* iter = calloc(1, sizeof(HashMapIterator));
     iter->map = map;
     size_t firstOccupiedBucketIndex = hash_map_next_occupied_bucket_index(map, 0);
 
@@ -90,17 +107,15 @@ void hash_map_iterator_begin(const HashMap* map, HashMapIterator* iter)
     {
         iter->bucketIndex = firstOccupiedBucketIndex;
         iter->bucket = map->buckets[firstOccupiedBucketIndex];
-        iter->key = iter->bucket->key;
-        iter->value = iter->bucket->value;
     }
+
+    return iter;
 }
 
 
 void hash_map_iterator_set_end(const HashMap* map, HashMapIterator* iter)
 {
     iter->map = map;
-    iter->key = 0;
-    iter->value = 0;
     iter->bucketIndex = 0;
     iter->bucket = 0;
 }
@@ -134,9 +149,6 @@ void hash_map_iterator_next(HashMapIterator* iter)
             return;
         }
     }
-
-    iter->key = iter->bucket->key;
-    iter->value = iter->bucket->value;
 }
 
 

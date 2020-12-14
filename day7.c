@@ -6,6 +6,7 @@
 #include "unity.h"
 #include <assert.h>
 #include "hash_map.h"
+#include "util.h"
 
 typedef struct
 {
@@ -15,7 +16,7 @@ typedef struct
 
 typedef struct
 {
-    char colorName[32];
+    char colorName[64];
     int id;
     int numContains;
     Contains contains[4];
@@ -38,29 +39,6 @@ void rule_add_contains(Rule* rule, int count, const char* adjective, const char*
 } 
 
 
-const char* copy_word(char* dst, const char* line)
-{
-    const char* iter = line;
- 
-    while (isalnum(*iter++));
-    const size_t wordLength = iter - line - 1;
-    strncpy(dst, line, wordLength);
-    dst[wordLength] = 0; 
-
-    while (!isalnum(*iter) && *iter != '\0')
-    {
-        iter++;
-    }
-
-    if (*iter == '\0')
-    {
-        return 0;
-    }
-    else
-    {
-        return iter;
-    }
-}
 
 
 Rule parse_rule(const char* line)
@@ -112,8 +90,7 @@ void assign_color_ids(Rule* rule, HashMap* colorRuleHashMap, char** idToColor)
 
 bool check_rule(Rule* rule, HashMap* colorRuleHashMap, int targetId)
 {
-    HashMap visitedHashMap;
-    hash_map_init(&visitedHashMap, 1024);
+    HashMap* visitedHashMap = hash_map_init(1024);
     const Rule* activeRules[1024];
     int numActiveRules = 0;
     activeRules[numActiveRules++] = rule;
@@ -123,9 +100,9 @@ bool check_rule(Rule* rule, HashMap* colorRuleHashMap, int targetId)
     {
         const Rule* currentRule = activeRules[--numActiveRules];
 
-        if (!hash_map_has_key(&visitedHashMap, currentRule->colorName))
+        if (!hash_map_has_key(visitedHashMap, currentRule->colorName))
         {
-            hash_map_insert(&visitedHashMap, currentRule->colorName, (void*)1);
+            hash_map_insert(visitedHashMap, currentRule->colorName, (void*)1);
             if (currentRule->id == targetId)
             {
                 return true;
@@ -140,6 +117,8 @@ bool check_rule(Rule* rule, HashMap* colorRuleHashMap, int targetId)
             }
         }
     } 
+
+    hash_map_free(visitedHashMap);
 
     return false;
 }
@@ -209,44 +188,45 @@ void test_parse_rule()
 
 void test_hash_map()
 {
-    HashMap map;
-    hash_map_init(&map, 16);
+    HashMap* map = hash_map_init(16);
 
-    TEST_ASSERT_EQUAL(0, hash_map_find(&map, "Test"));
+    TEST_ASSERT_EQUAL(0, hash_map_find(map, "Test"));
     
-    hash_map_insert(&map, "eins",      (void*)1);
-    hash_map_insert(&map, "zwei",      (void*)2);
-    hash_map_insert(&map, "drei",      (void*)3);
-    hash_map_insert(&map, "vier",      (void*)4);
-    hash_map_insert(&map, "fuenf",     (void*)5);
-    hash_map_insert(&map, "sechs",     (void*)6);
-    hash_map_insert(&map, "sieben",    (void*)7);
-    hash_map_insert(&map, "acht",      (void*)8);
-    hash_map_insert(&map, "neun",      (void*)9);
-    hash_map_insert(&map, "zehn",      (void*)10);
-    hash_map_insert(&map, "elf",       (void*)11);
-    hash_map_insert(&map, "zwoelf",    (void*)12);
-    hash_map_insert(&map, "dreizehn",  (void*)13);
-    hash_map_insert(&map, "vierzehn",  (void*)14);
-    hash_map_insert(&map, "fuenfzehn", (void*)15);
-    hash_map_insert(&map, "sechzehn",  (void*)16);
-    TEST_ASSERT(hash_map_find(&map, "eins") != 0);
-    TEST_ASSERT_EQUAL(1, (size_t)hash_map_find(&map, "eins")->value);
-    TEST_ASSERT_EQUAL(2, (size_t)hash_map_find(&map, "zwei")->value);
-    TEST_ASSERT_EQUAL(3, (size_t)hash_map_find(&map, "drei")->value);
-    TEST_ASSERT_EQUAL(4, (size_t)hash_map_find(&map, "vier")->value);
-    TEST_ASSERT_EQUAL(5, (size_t)hash_map_find(&map, "fuenf")->value);
-    TEST_ASSERT_EQUAL(6, (size_t)hash_map_find(&map, "sechs")->value);
-    TEST_ASSERT_EQUAL(7, (size_t)hash_map_find(&map, "sieben")->value);
-    TEST_ASSERT_EQUAL(8, (size_t)hash_map_find(&map, "acht")->value);
-    TEST_ASSERT_EQUAL(9, (size_t)hash_map_find(&map, "neun")->value);
-    TEST_ASSERT_EQUAL(10, (size_t)hash_map_find(&map, "zehn")->value);
-    TEST_ASSERT_EQUAL(11, (size_t)hash_map_find(&map, "elf")->value);
-    TEST_ASSERT_EQUAL(12, (size_t)hash_map_find(&map, "zwoelf")->value);
-    TEST_ASSERT_EQUAL(13, (size_t)hash_map_find(&map, "dreizehn")->value);
-    TEST_ASSERT_EQUAL(14, (size_t)hash_map_find(&map, "vierzehn")->value);
-    TEST_ASSERT_EQUAL(15, (size_t)hash_map_find(&map, "fuenfzehn")->value);
-    TEST_ASSERT_EQUAL(16, (size_t)hash_map_find(&map, "sechzehn")->value);
+    hash_map_insert(map, "eins",      (void*)1);
+    hash_map_insert(map, "zwei",      (void*)2);
+    hash_map_insert(map, "drei",      (void*)3);
+    hash_map_insert(map, "vier",      (void*)4);
+    hash_map_insert(map, "fuenf",     (void*)5);
+    hash_map_insert(map, "sechs",     (void*)6);
+    hash_map_insert(map, "sieben",    (void*)7);
+    hash_map_insert(map, "acht",      (void*)8);
+    hash_map_insert(map, "neun",      (void*)9);
+    hash_map_insert(map, "zehn",      (void*)10);
+    hash_map_insert(map, "elf",       (void*)11);
+    hash_map_insert(map, "zwoelf",    (void*)12);
+    hash_map_insert(map, "dreizehn",  (void*)13);
+    hash_map_insert(map, "vierzehn",  (void*)14);
+    hash_map_insert(map, "fuenfzehn", (void*)15);
+    hash_map_insert(map, "sechzehn",  (void*)16);
+    TEST_ASSERT(hash_map_find(map, "eins") != 0);
+    TEST_ASSERT_EQUAL(1, (size_t)hash_map_find(map, "eins")->value);
+    TEST_ASSERT_EQUAL(2, (size_t)hash_map_find(map, "zwei")->value);
+    TEST_ASSERT_EQUAL(3, (size_t)hash_map_find(map, "drei")->value);
+    TEST_ASSERT_EQUAL(4, (size_t)hash_map_find(map, "vier")->value);
+    TEST_ASSERT_EQUAL(5, (size_t)hash_map_find(map, "fuenf")->value);
+    TEST_ASSERT_EQUAL(6, (size_t)hash_map_find(map, "sechs")->value);
+    TEST_ASSERT_EQUAL(7, (size_t)hash_map_find(map, "sieben")->value);
+    TEST_ASSERT_EQUAL(8, (size_t)hash_map_find(map, "acht")->value);
+    TEST_ASSERT_EQUAL(9, (size_t)hash_map_find(map, "neun")->value);
+    TEST_ASSERT_EQUAL(10, (size_t)hash_map_find(map, "zehn")->value);
+    TEST_ASSERT_EQUAL(11, (size_t)hash_map_find(map, "elf")->value);
+    TEST_ASSERT_EQUAL(12, (size_t)hash_map_find(map, "zwoelf")->value);
+    TEST_ASSERT_EQUAL(13, (size_t)hash_map_find(map, "dreizehn")->value);
+    TEST_ASSERT_EQUAL(14, (size_t)hash_map_find(map, "vierzehn")->value);
+    TEST_ASSERT_EQUAL(15, (size_t)hash_map_find(map, "fuenfzehn")->value);
+    TEST_ASSERT_EQUAL(16, (size_t)hash_map_find(map, "sechzehn")->value);
+
+    hash_map_free(map);
 }
 
 
@@ -263,8 +243,7 @@ int main(int argc, char** argv)
     char line[512];
     Rule rules[1024];
     int ruleCount = 0;
-    HashMap colorRuleHashMap;
-    hash_map_init(&colorRuleHashMap, 1024);
+    HashMap* colorRuleHashMap = hash_map_init(1024);
     char* idToColor[1024];
     while (!feof(fp))
     {
@@ -272,7 +251,7 @@ int main(int argc, char** argv)
         {
             line[strlen(line) - 1] = '\0';
             rules[ruleCount] = parse_rule(line);
-            assign_color_ids(&rules[ruleCount], &colorRuleHashMap, idToColor);
+            assign_color_ids(&rules[ruleCount], colorRuleHashMap, idToColor);
             if (!strcmp(rules[ruleCount].colorName, "shiny gold"))
             {
                 printf("%s\n", line);
@@ -281,17 +260,17 @@ int main(int argc, char** argv)
         }
     }
 
-    const int numColors = colorRuleHashMap.size;
+    const int numColors = colorRuleHashMap->size;
 
     for (int id = 0; id < numColors; ++id)
     {
         const char* name = idToColor[id];
-        assert(hash_map_has_key(&colorRuleHashMap, name));
-        Rule* rule = hash_map_find(&colorRuleHashMap, name)->value;
+        assert(hash_map_has_key(colorRuleHashMap, name));
+        Rule* rule = hash_map_find(colorRuleHashMap, name)->value;
         assert(rule->id == id);
     }
 
-    const int shinyGoldId = ((Rule*)hash_map_find(&colorRuleHashMap, "shiny gold")->value)->id;
+    const int shinyGoldId = ((Rule*)hash_map_find(colorRuleHashMap, "shiny gold")->value)->id;
     printf("shiny gold: %d\n", shinyGoldId);
 
     int count = 0;
@@ -304,7 +283,7 @@ int main(int argc, char** argv)
             continue;
         }
 
-        if (check_rule(rule, &colorRuleHashMap, shinyGoldId))
+        if (check_rule(rule, colorRuleHashMap, shinyGoldId))
         {
             count++;
         }
@@ -312,19 +291,20 @@ int main(int argc, char** argv)
 
     printf("Result: %d\n", count);
 
-    Rule* shinyGoldRule = hash_map_find(&colorRuleHashMap, "shiny gold")->value;
-    long long numBags = count_bags(shinyGoldRule, &colorRuleHashMap);
+    Rule* shinyGoldRule = hash_map_find(colorRuleHashMap, "shiny gold")->value;
+    long long numBags = count_bags(shinyGoldRule, colorRuleHashMap);
     printf("Required Bags: %lld\n", numBags);
 
 
-    HashMapIterator iter;
-    hash_map_iterator_begin(&colorRuleHashMap, &iter);
-    while (!hash_map_iterator_is_end(&iter))
+    HashMapIterator* iter = hash_map_iterator_begin(colorRuleHashMap);
+    while (!hash_map_iterator_is_end(iter))
     {
-        printf("%s\n", iter.key);
-        hash_map_iterator_next(&iter);
+        printf("%s\n", hash_map_iterator_get_key(iter));
+        hash_map_iterator_next(iter);
     }
 
+    free(iter);
+    hash_map_free(colorRuleHashMap);
     return 0;
 }
 
