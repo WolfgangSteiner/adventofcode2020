@@ -29,7 +29,7 @@ typedef struct
     HashMapBucket* bucket;
 } HashMapIterator;
 
-void hash_map_init(HashMap* map, uint32_t capacity);
+HashMap* hash_map_init(uint32_t capacity);
 void hash_map_insert(HashMap* map, const char* key, void* value);
 const HashMapBucket* hash_map_find(const HashMap* map, const char* key);
 bool hash_map_has_key(const HashMap* map, const char* key);

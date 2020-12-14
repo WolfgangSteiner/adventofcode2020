@@ -1,5 +1,4 @@
 #include "hash_map.h"
-//#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -8,7 +7,7 @@ uint32_t sdbm(const char* str)
     uint32_t hash = 0;
     int c;
 
-    while (c = *str++)
+    while (true == (c = *str++))
     {
         hash = c + (hash << 6) + (hash << 16) - hash;
     }
@@ -17,11 +16,13 @@ uint32_t sdbm(const char* str)
 }
 
 
-void hash_map_init(HashMap* map, uint32_t capacity)
+HashMap* hash_map_init(uint32_t capacity)
 {
+    HashMap* map = calloc(1, sizeof(HashMap));
     map->size = 0;
     map->capacity = capacity;
     map->buckets = calloc(capacity, sizeof(HashMapBucket*));
+    return map;
 }
 
 
@@ -74,6 +75,8 @@ size_t hash_map_next_occupied_bucket_index(const HashMap* map, size_t startIndex
             return i;
         }
     }
+
+    return 0xffffffffffffffff;
 }
 
 
@@ -82,6 +85,7 @@ void hash_map_iterator_begin(const HashMap* map, HashMapIterator* iter)
     memset(iter, 0, sizeof(HashMapIterator));
     iter->map = map;
     size_t firstOccupiedBucketIndex = hash_map_next_occupied_bucket_index(map, 0);
+
     if (firstOccupiedBucketIndex < map->capacity)
     {
         iter->bucketIndex = firstOccupiedBucketIndex;
@@ -118,7 +122,7 @@ void hash_map_iterator_next(HashMapIterator* iter)
     {
         size_t nextOccupiedBucketIndex =
             hash_map_next_occupied_bucket_index(iter->map, iter->bucketIndex + 1);
-        
+
         if (nextOccupiedBucketIndex < iter->map->capacity)
         {
             iter->bucketIndex = nextOccupiedBucketIndex;
