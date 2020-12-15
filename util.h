@@ -13,7 +13,7 @@ typedef struct
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MImplies(a, b) assert((a) && (b) || !(a))
+#define MImplies(a, b) assert(((a) && (b)) || !(a))
 
 void int_array_delete(int_array* array);
 int_array* int_array_new();

@@ -76,7 +76,7 @@ char grid_get_state(const Grid* grid, int row, int col)
 }
 
 
-char grid_set_state(Grid* grid, int row, int col, char state)
+void grid_set_state(Grid* grid, int row, int col, char state)
 {
     grid->rows[row][col] = state;
 }
@@ -124,7 +124,6 @@ int grid_num_occupied_visible_neighbors_direction(const Grid* grid, int row, int
 {
     int x = col;
     int y = row;
-    int result = 0;
 
     while (true)
     {
@@ -239,9 +238,10 @@ Grid* grid_read(const char* fileName)
     {
         if (fgets(line, 512, fp))
         {
-            const int width = strlen(line) - 1;
+            chomp(line);
+            const int width = strlen(line);
             grid->rows[grid->numRows] = malloc(width);
-            strncpy(grid->rows[grid->numRows], line, width);
+            strncpy(grid->rows[grid->numRows], line, grid->numCols);
             MImplies(grid->numCols, width == grid->numCols);
             grid->numCols = width;
             grid->numRows++;

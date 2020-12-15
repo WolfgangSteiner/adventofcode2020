@@ -30,16 +30,15 @@ typedef struct
 
 HashMap_int* hash_map_init_int(uint32_t capacity);
 void hash_map_insert_int(HashMap_int* map, size_t key, void* value);
-const HashMapBucket_int* hash_map_find_int(const HashMap_int* map, size_t key);
+HashMapIterator_int* hash_map_find_int(const HashMap_int* map, size_t key);
 bool hash_map_has_key_int(const HashMap_int* map, size_t key);
 void hash_map_update_value_int(HashMap_int* map, size_t key, void* value);
-void hash_map_free_int(HashMap_int* map);
+void hash_map_free_int(HashMap_int* map, void(*free_callback)(void*));
 
 HashMapIterator_int* hash_map_iterator_begin_int(const HashMap_int* map);
 void hash_map_iterator_next_int(HashMapIterator_int* iter);
 bool hash_map_iterator_is_end_int(const HashMapIterator_int* iter);
 size_t hash_map_iterator_get_key_int(const HashMapIterator_int* iter);
 void* hash_map_iterator_get_value_int(const HashMapIterator_int* iter);
-
 
 #endif

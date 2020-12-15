@@ -26,18 +26,24 @@ HashMap_int* hash_map_init_int(uint32_t capacity)
 }
 
 
-void hash_map_free_bucket_int(HashMapBucket_int* bucket)
+void hash_map_free_bucket_int(HashMapBucket_int* bucket, void(*free_callback)(void*))
 {
-    if (bucket->next) hash_map_free_bucket_int(bucket->next);
+    if (bucket->next) hash_map_free_bucket_int(bucket->next, free_callback);
+
+    if (free_callback)
+    {
+        free_callback(bucket->value);
+    }
+
     free(bucket);
 }
 
-void hash_map_free_int(HashMap_int* map)
+void hash_map_free_int(HashMap_int* map, void(*free_callback)(void*))
 {
     for (int i = 0; i < map->capacity; ++i)
     {
         HashMapBucket_int* bucket = map->buckets[i];
-        if (bucket) hash_map_free_bucket_int(bucket);
+        if (bucket) hash_map_free_bucket_int(bucket, free_callback);
     } 
 
     free(map->buckets);
@@ -74,7 +80,7 @@ void hash_map_insert_int(HashMap_int* map, size_t key, void* value)
 }
 
 
-const HashMapBucket_int* hash_map_find_int(const HashMap_int* map, size_t key)
+HashMapIterator_int* hash_map_find_int(const HashMap_int* map, size_t key)
 {
     const size_t idx = hash_map_compute_index_int(map, key);
     HashMapBucket_int* bucket = map->buckets[idx];
@@ -84,21 +90,34 @@ const HashMapBucket_int* hash_map_find_int(const HashMap_int* map, size_t key)
         bucket = bucket->next;
     }
 
-    return bucket;
+    HashMapIterator_int* iter = calloc(1, sizeof(HashMapIterator_int));
+    iter->map = map;
+
+    if (bucket)
+    {
+        iter->bucket = bucket;
+        iter->bucketIndex = idx;
+    }
+
+    return iter;
 }
 
 
 bool hash_map_has_key_int(const HashMap_int* map, size_t key)
 {
-    return hash_map_find_int(map, key);
+    HashMapIterator_int* iter = hash_map_find_int(map, key);
+    const bool is_end = hash_map_iterator_is_end_int(iter);
+    free(iter);
+    return !is_end;
 }
 
 
 void hash_map_update_value_int(HashMap_int* map, size_t key, void* value)
 {
-    HashMapBucket_int* bucket = (HashMapBucket_int*) hash_map_find_int(map, key);
-    assert(bucket);
-    bucket->value = value;
+    HashMapIterator_int* iter = hash_map_find_int(map, key);
+    assert(!hash_map_iterator_is_end_int(iter));
+    iter->bucket->value = value;
+    free(iter);
 }
 
 
