@@ -170,20 +170,22 @@ bool is_ticket_value_valid(const problem_t* problem, int value)
 
 
 
-int check_invalid_ticket(const problem_t* problem, const ticket_t* ticket)
+bool is_ticket_valid(const problem_t* problem, const ticket_t* ticket, int* sum_invalid_fields)
 {
-    int result = 0;
+    *sum_invalid_fields = 0;
+    bool is_valid = true;
 
     for (int i = 0; i < ticket->num_fields; ++i)
     {
         int value = ticket->fields[i];
         if (!is_ticket_value_valid(problem, value))
         {
-            result += value;
+            is_valid = false;
+            *sum_invalid_fields += value;
         }
     }
 
-    return result;
+    return is_valid;
 }
 
 
@@ -193,7 +195,11 @@ int find_invalid_tickets(problem_t* problem)
 
     for (int i = 1; i < problem->num_tickets; ++i)
     {
-        result += check_invalid_ticket(problem, problem->tickets[i]);
+        int sum_invalid_fields = 0; 
+        if (!is_ticket_valid(problem, problem->tickets[i], &sum_invalid_fields))
+        {
+            result += sum_invalid_fields;
+        }
     }
 
     return result;
@@ -203,7 +209,8 @@ bool should_delete_ticket(const void* element, const void* user_data)
 {
     const ticket_t* ticket = element;
     const problem_t* problem = user_data;
-    bool result = check_invalid_ticket(problem, ticket);
+    int unused;
+    bool result = !is_ticket_valid(problem, ticket, &unused);
     return result;
 }
 
@@ -214,7 +221,8 @@ size_t count_invalid_tickets(const problem_t* problem)
     for (int i = 0; i < problem->num_tickets; ++i)
     {
         const ticket_t* t = problem->tickets[i];
-        if (check_invalid_ticket(problem, t))
+        int unused;
+        if (!is_ticket_valid(problem, t, &unused))
         {
             result++;
         }
@@ -385,14 +393,12 @@ void resolve_field_assignments(problem_t* problem)
     {
         rule_t* rule = rules[i];
         
-        if (rule->num_possible_fields == 1)
-        {
-            size_t field_to_eliminate = rule->possible_fields[0];
-            eliminate_field_for_rules(rules, num_rules, i + 1, field_to_eliminate);
-        }
+        assert(rule->num_possible_fields == 1);
+        size_t field_to_eliminate = rule->possible_fields[0];
+        eliminate_field_for_rules(rules, num_rules, i + 1, field_to_eliminate);
     }
 
-    // assert(rules[num_rules - 1]->num_possible_fields == 1);
+    assert(rules[num_rules - 1]->num_possible_fields == 1);
     free(rules); 
 }
 
