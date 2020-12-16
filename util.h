@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <stdbool.h>
 
 typedef struct
 {
@@ -28,5 +29,13 @@ int_array* int_array_read(char* fileName);
 void int_array_print(const int_array* array);
 const char* copy_word(char* dst, const char* line);
 
+void remove_array_elements(
+    void** array,
+    size_t* size,
+    bool(*should_delete_callback)(const void*, const void*),
+    const void* user_data);
+
+
 int chomp(char* str);
+
 #endif

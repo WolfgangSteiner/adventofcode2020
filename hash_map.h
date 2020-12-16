@@ -28,9 +28,9 @@ typedef struct
 } HashMapIterator;
 
 HashMap* hash_map_init(uint32_t capacity);
-void hash_map_free(HashMap* map);
+void hash_map_free(HashMap* map, void(*free_callback)(void*));
 void hash_map_insert(HashMap* map, const char* key, void* value);
-const HashMapBucket* hash_map_find(const HashMap* map, const char* key);
+HashMapIterator* hash_map_find(const HashMap* map, const char* key);
 bool hash_map_has_key(const HashMap* map, const char* key);
 
 HashMapIterator* hash_map_iterator_begin(const HashMap* map);

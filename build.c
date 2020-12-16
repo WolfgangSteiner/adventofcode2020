@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
+
 typedef struct
 {
     bool debug;
@@ -48,11 +50,16 @@ int main(int argc, char** argv)
     const char* build_options = "-g -O2";
     const char* warnings = "-Wall -Werror";
     const char* include_dirs = "-IUnity/src";
-
+    int result = 1;
     snprintf(cmd, 1024, "gcc %s %s %s -o bin/%s %s.c %s",
             build_options, warnings, include_dirs, args->file_name, args->file_name, src_files);
 
-    int result = system(cmd);
+    while (result)
+    {
+        system("clear");
+        result = system(cmd); 
+        sleep(1);
+    }
 
     if (result == 0)
     {

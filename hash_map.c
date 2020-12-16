@@ -25,18 +25,24 @@ HashMap* hash_map_init(uint32_t capacity)
     return map;
 }
 
-void hash_map_free_bucket(HashMapBucket* bucket)
+void hash_map_free_bucket(HashMapBucket* bucket, void(*free_callback)(void*))
 {
-    if (bucket->next) hash_map_free_bucket(bucket->next);
+    if (bucket->next) hash_map_free_bucket(bucket->next, free_callback);
+
+    if (free_callback)
+    {
+        free_callback(bucket->value);
+    }
+
     free(bucket);
 }
 
-void hash_map_free(HashMap* map)
+void hash_map_free(HashMap* map, void(*free_callback)(void*))
 {
     for (int i = 0; i < map->capacity; ++i)
     {
         HashMapBucket* bucket = map->buckets[i];
-        if (bucket) hash_map_free_bucket(bucket);
+        if (bucket) hash_map_free_bucket(bucket, free_callback);
     } 
 
     free(map->buckets);
@@ -63,23 +69,36 @@ void hash_map_insert(HashMap* map, const char* key, void* value)
 }
 
 
-const HashMapBucket* hash_map_find(const HashMap* map, const char* key)
+HashMapIterator* hash_map_find(const HashMap* map, const char* key)
 {
-    const uint32_t hash = sdbm(key) % map->capacity; 
-    const HashMapBucket* bucket = map->buckets[hash];
+    HashMapIterator* iter = calloc(1, sizeof(HashMapIterator));
+    iter->map = map;
+
+    const uint32_t hash = sdbm(key); 
+    const uint32_t index = hash % map->capacity;
+    HashMapBucket* bucket = map->buckets[hash];
 
     while (bucket && strcmp(bucket->key, key))
     {
         bucket = bucket->next;
     }
+    
+    if (bucket)
+    {
+        iter->bucket = bucket;
+        iter->bucketIndex = index;
+    }
 
-    return bucket;
+    return iter;
 }
 
 
 bool hash_map_has_key(const HashMap* map, const char* key)
 {
-    return hash_map_find(map, key);
+    HashMapIterator* iter = hash_map_find(map, key);
+    bool result = !hash_map_iterator_is_end(iter);
+    free(iter);
+    return result;
 }
 
 

@@ -157,3 +157,43 @@ int chomp(char* str)
 
     return length;
 }
+
+void remove_array_elements(
+    void** array,
+    size_t* size,
+    bool(*should_delete_callback)(const void*, const void*),
+    const void* user_data)
+{
+    int start_idx = 0;
+    int end_idx = start_idx;
+
+    while (true)
+    {
+        while (!should_delete_callback(array[start_idx], user_data))
+        {
+            start_idx++;
+            if (start_idx == *size)
+            {
+                return;
+            } 
+        }
+
+        end_idx = start_idx;
+
+        while (should_delete_callback(array[end_idx], user_data))
+        {
+            end_idx++;
+            if (end_idx == *size)
+            {
+                *size = start_idx;
+                return;        
+            }
+        }
+
+        size_t num_elements_to_move = *size - end_idx;
+        size_t num_elements_to_delete = end_idx - start_idx;
+
+        memmove(&array[start_idx], &array[end_idx], num_elements_to_move * sizeof(void*));
+        *size -= num_elements_to_delete;
+    }
+}
