@@ -24,7 +24,7 @@ void int_array_push_back(int_array* array, int value);
 void int_array_sort(int_array* array);
 int int_array_front(const int_array* array);
 int int_array_back(const int_array* array);
-int int_array_at(const int_array* array, int index);
+int int_array_at(const int_array* array, size_t index);
 int_array* int_array_read(char* fileName);
 void int_array_print(const int_array* array);
 const char* copy_word(char* dst, const char* line);

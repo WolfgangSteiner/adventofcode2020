@@ -47,8 +47,9 @@ int main(int argc, char** argv)
     system("mkdir -p bin");
 
     const char* src_files = "Unity/src/unity.c util.c hash_map.c hash_map_int.c";
-    const char* build_options = "-g -O2";
-    const char* warnings = "-Wall -Werror";
+
+    const char* build_options = args->debug ? "-g" : "-O3";
+    const char* warnings = "-Wall -Werror -Wextra";
     const char* include_dirs = "-IUnity/src";
     int result = 1;
     snprintf(cmd, 1024, "gcc %s %s %s -o bin/%s %s.c %s",
@@ -56,7 +57,7 @@ int main(int argc, char** argv)
 
     while (result)
     {
-        system("clear");
+        //system("clear");
         result = system(cmd); 
         sleep(1);
     }

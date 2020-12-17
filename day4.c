@@ -4,6 +4,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "util.h"
+#include "unity.h"
+
 
 bool check_passport_fields_present(char* record)
 {
@@ -33,7 +36,6 @@ int find_end_of_word(char* word)
 
 char* get_value(char* field)
 {
-    int idx = 0;
     char* valueStart = strchr(field, ':');
 
     if (valueStart == 0)
@@ -183,7 +185,7 @@ bool check_hcl(const char* record)
     char* val = get_value(pos);
     if (strlen(val) != 7 || val[0] != '#') goto end; 
 
-    for (int i = 1; i < strlen(val); ++i)
+    for (size_t i = 1; i < strlen(val); ++i)
     {
         if (!isxdigit(val[i])) goto end;
     }
@@ -231,7 +233,7 @@ bool check_pid(const char* record)
     char* val = get_value(pos);
     if (strlen(val) != 9) goto end; 
 
-    for (int i = 0; i < strlen(val); ++i)
+    for (size_t i = 0; i < strlen(val); ++i)
     {
         if (!isdigit(val[i])) goto end;
     }
@@ -257,136 +259,139 @@ bool check_passport_valid(char* record)
 }
 
 
+void setUp() {}
+void tearDown() {}
+
 void test_check_byr()
 {
-    assert(check_byr("byr:1974") == true);
-    assert(check_byr("byr:20000") == false);
-    assert(check_byr("byr:x2000") == false);
-    assert(check_byr("byr:x200") == false);
-    assert(check_byr("byr:2000asdf") == false);
-    assert(check_byr("iyr:2000") == false);
-    assert(check_byr("iyr:2020 byr:1968"));
-    printf("test_byr OK\n");
+    TEST_ASSERT_TRUE(check_byr("byr:1974"));
+    TEST_ASSERT_FALSE(check_byr("byr:20000") == false);
+    TEST_ASSERT_FALSE(check_byr("byr:x2000") == false);
+    TEST_ASSERT_FALSE(check_byr("byr:x200") == false);
+    TEST_ASSERT_FALSE(check_byr("byr:2000asdf") == false);
+    TEST_ASSERT_FALSE(check_byr("iyr:2000") == false);
+    TEST_ASSERT_TRUE(check_byr("iyr:2020 byr:1968"));
 }
 
 
 void test_parse_int()
 {
     int result;
-    assert(parse_int("2", &result) == 1 && result == 2);
-    assert(parse_int("20", &result) == 2 && result == 20);
-    assert(parse_int("200", &result) == 3 && result == 200);
-    assert(parse_int("2000", &result) == 4 && result == 2000);
-    assert(parse_int("x2000", &result) == -1);
-    assert(parse_int("2000x", &result) == -1);
-    printf("test_parse_int OK\n");
+    TEST_ASSERT_EQUAL(1, parse_int("2", &result));
+    TEST_ASSERT_EQUAL(2, result);
+        
+    TEST_ASSERT_EQUAL(2, parse_int("20", &result));
+    TEST_ASSERT_EQUAL(20, result);
+
+    TEST_ASSERT_EQUAL(3, parse_int("200", &result));
+    TEST_ASSERT_EQUAL(200, result);
+
+    TEST_ASSERT_EQUAL(4, parse_int("2000", &result));
+    TEST_ASSERT_EQUAL(2000, result);
+
+    TEST_ASSERT_EQUAL(-1, parse_int("x2000", &result));
+    TEST_ASSERT_EQUAL(-1, parse_int("2000x", &result));
 }
 
 
 void test_find_end_of_word()
 {
-    assert(find_end_of_word("") == 0);
-    assert(find_end_of_word("a") == 1);
-    assert(find_end_of_word("a a") == 1);
-    assert(find_end_of_word("a ") == 1);
-    assert(find_end_of_word("a\n") == 1);
+    TEST_ASSERT_EQUAL(0, find_end_of_word(""));
+    TEST_ASSERT_EQUAL(1, find_end_of_word("a"));
+    TEST_ASSERT_EQUAL(1, find_end_of_word("a a"));
+    TEST_ASSERT_EQUAL(1, find_end_of_word("a "));
+    TEST_ASSERT_EQUAL(1, find_end_of_word("a\n"));
 }
 
-
-void assert_str_equal(char* a, char* b)
-{
-    assert(!strcmp(a, b));
-    free(a);
-}
 
 
 void test_get_value()
 {
-    assert_str_equal(get_value("byr:2000"), "2000");
-    assert_str_equal(get_value("byr:2000 "), "2000");
-    assert_str_equal(get_value("byr:2000asdf"), "2000asdf");
-    assert_str_equal(get_value("byr:2000asdf iyr:2000"), "2000asdf");
+    TEST_ASSERT_EQUAL_STRING(get_value("byr:2000"), "2000");
+    TEST_ASSERT_EQUAL_STRING(get_value("byr:2000 "), "2000");
+    TEST_ASSERT_EQUAL_STRING(get_value("byr:2000asdf"), "2000asdf");
+    TEST_ASSERT_EQUAL_STRING(get_value("byr:2000asdf iyr:2000"), "2000asdf");
 }
 
 void test_check_hgt()
 {
-    int size = 0;
-    assert(get_size("120cm", "cm", &size) && size == 120);
-    assert(get_size("120in", "in", &size) && size == 120);
-    assert(!get_size("120cm", "cmm", &size));
-    assert(!get_size("120cm", "in", &size));
-    assert(check_hgt("hgt:170cm"));
-    assert(!check_hgt("hgt:149cm"));
-    assert(!check_hgt("hgt:194cm"));
-    assert(check_hgt("hgt:60in"));
-    assert(!check_hgt("hgt:58in"));
-    assert(!check_hgt("hgt:77in"));
+    int size;
+    TEST_ASSERT_TRUE(get_size("120cm", "cm", &size) && size == 120);
+    TEST_ASSERT_TRUE(get_size("120in", "in", &size) && size == 120);
+    TEST_ASSERT_TRUE(get_size("120cm", "cm", &size) && size == 120);
+    TEST_ASSERT_TRUE(get_size("120in", "in", &size) && size == 120);
+    TEST_ASSERT_FALSE(get_size("120cm", "cmm", &size));
+    TEST_ASSERT_FALSE(get_size("120cm", "in", &size));
+    TEST_ASSERT_TRUE(check_hgt("hgt:170cm"));
+    TEST_ASSERT_FALSE(check_hgt("hgt:149cm"));
+    TEST_ASSERT_FALSE(check_hgt("hgt:194cm"));
+    TEST_ASSERT_TRUE(check_hgt("hgt:60in"));
+    TEST_ASSERT_FALSE(check_hgt("hgt:58in"));
+    TEST_ASSERT_FALSE(check_hgt("hgt:77in"));
     printf("test_check_hgt OK\n");
 }
 
 void test_check_hcl()
 {
-    assert(check_hcl("hcl:#012abc"));
-    assert(check_hcl("hcl:#345def"));
-    assert(check_hcl("hcl:#6789ab"));
-    assert(!check_hcl("hcl:#012abce"));
-    assert(!check_hcl("hcl:#012abk"));
-    printf("test_check_hcl OK\n");
+    TEST_ASSERT_TRUE(check_hcl("hcl:#012abc"));
+    TEST_ASSERT_TRUE(check_hcl("hcl:#345def"));
+    TEST_ASSERT_TRUE(check_hcl("hcl:#6789ab"));
+    TEST_ASSERT_FALSE(check_hcl("hcl:#012abce"));
+    TEST_ASSERT_FALSE(check_hcl("hcl:#012abk"));
 }
 
 
 void test_check_ecl()
 {
-    assert(check_ecl("ecl:amb"));
-    assert(check_ecl("ecl:blu"));
-    assert(check_ecl("ecl:brn"));
-    assert(check_ecl("ecl:gry"));
-    assert(check_ecl("ecl:grn"));
-    assert(check_ecl("ecl:hzl"));
-    assert(check_ecl("ecl:oth"));
-    assert(!check_ecl("ecl:amba"));
-    assert(!check_ecl("ecl:bluz"));
-    assert(!check_ecl("ecl:bri"));
-    assert(!check_ecl("acl:blu"));
-    printf("test_check_ecl OK\n");
+    TEST_ASSERT_TRUE(check_ecl("ecl:amb"));
+    TEST_ASSERT_TRUE(check_ecl("ecl:blu"));
+    TEST_ASSERT_TRUE(check_ecl("ecl:brn"));
+    TEST_ASSERT_TRUE(check_ecl("ecl:gry"));
+    TEST_ASSERT_TRUE(check_ecl("ecl:grn"));
+    TEST_ASSERT_TRUE(check_ecl("ecl:hzl"));
+    TEST_ASSERT_TRUE(check_ecl("ecl:oth"));
+    TEST_ASSERT_FALSE(check_ecl("ecl:amba"));
+    TEST_ASSERT_FALSE(check_ecl("ecl:bluz"));
+    TEST_ASSERT_FALSE(check_ecl("ecl:bri"));
+    TEST_ASSERT_FALSE(check_ecl("acl:blu"));
 }
 
 void test_check_pid()
 {
-    assert(check_pid("pid:012345678"));
-    assert(!check_pid("pid:1234"));
-    assert(!check_pid("pid:0123456789"));
-    assert(!check_pid("pid:012a45678"));
-    assert(!check_pid("pid:a12345678"));
-    assert(!check_pid("pid:012345678a"));
-    printf("test_check_pid OK\n");
+    TEST_ASSERT_TRUE(check_pid("pid:012345678"));
+    TEST_ASSERT_FALSE(check_pid("pid:1234"));
+    TEST_ASSERT_FALSE(check_pid("pid:0123456789"));
+    TEST_ASSERT_FALSE(check_pid("pid:012a45678"));
+    TEST_ASSERT_FALSE(check_pid("pid:a12345678"));
+    TEST_ASSERT_FALSE(check_pid("pid:012345678a"));
 }
 
 
 void test_check_passport()
 {
     char* p1 = "iyr:2020 byr:1968\necl:gry\neyr:2030 hcl:#1976b0\ncid:127 pid:701862616\nhgt:161cm\n";
-
     char *p2 = "eyr:2027 iyr:2019 ecl:#a0eeca hcl:#c0946f pid:724783488 byr:1943 cid:282 hgt:124\n";
-    assert(check_iyr(p1));
-    assert(check_byr(p1));
-    assert(check_eyr(p1));
-    assert(check_passport_valid(p1));
-    assert(!check_passport_valid(p2));
+    TEST_ASSERT_TRUE(check_iyr(p1));
+    TEST_ASSERT_TRUE(check_byr(p1));
+    TEST_ASSERT_TRUE(check_eyr(p1));
+    TEST_ASSERT_TRUE(check_passport_valid(p1));
+    TEST_ASSERT_FALSE(check_passport_valid(p2));
 }
 
 
-int main(int argc, char** argv)
+int main()
 {
-    test_find_end_of_word();
-    test_get_value();
-    test_parse_int();
-    test_check_byr();
-    test_check_hgt();
-    test_check_hcl();
-    test_check_ecl();
-    test_check_pid();
-    test_check_passport();
+    UNITY_BEGIN();
+    RUN_TEST(test_find_end_of_word);
+    RUN_TEST(test_get_value);
+    RUN_TEST(test_parse_int);
+    RUN_TEST(test_check_byr);
+    RUN_TEST(test_check_hgt);
+    RUN_TEST(test_check_hcl);
+    RUN_TEST(test_check_ecl);
+    RUN_TEST(test_check_pid);
+    RUN_TEST(test_check_passport);
+    UNITY_END();
 
     FILE* fp = fopen("day4.txt", "r");
 
@@ -395,7 +400,6 @@ int main(int argc, char** argv)
     record[0] = '\0';
 
     int numValid = 0;
-    int readResult;
 
     while (true)
     {

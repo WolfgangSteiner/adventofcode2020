@@ -87,10 +87,9 @@ int int_array_back(const int_array* array)
     return array->values[array->size - 1];
 }
 
-int int_array_at(const int_array* array, int index)
+int int_array_at(const int_array* array, size_t index)
 {
     assert(array->size);
-    assert(index >= 0);
     assert(index < array->size);
     return array->values[index];
 }
@@ -112,7 +111,7 @@ int_array* int_array_read(char* fileName)
 
 void int_array_print(const int_array* array)
 {
-    for (int i = 0; i < array->size; ++i)
+    for (size_t i = 0; i < array->size; ++i)
     {
         printf("%d\n", array->values[i]);
     }
@@ -164,8 +163,8 @@ void remove_array_elements(
     bool(*should_delete_callback)(const void*, const void*),
     const void* user_data)
 {
-    int start_idx = 0;
-    int end_idx = start_idx;
+    size_t start_idx = 0;
+    size_t end_idx = start_idx;
 
     while (true)
     {

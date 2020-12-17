@@ -12,7 +12,7 @@ int countTrees(int incX, int incY)
     int px = 0;
     int py = 0;
 
-    while (fscanf(fp, "%s", &map) != EOF)
+    while (fscanf(fp, "%s", map) != EOF)
     {
         if (py % incY == 0)
         { 
@@ -30,7 +30,7 @@ int countTrees(int incX, int incY)
 
 
 
-int main(int argc, char** argv)
+int main()
 {
     typedef struct { int xi; int yi; } Slope;
     Slope slopes[] = {{1,1}, {3,1}, {5,1}, {7,1}, {1,2}};

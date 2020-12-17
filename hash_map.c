@@ -39,7 +39,7 @@ void hash_map_free_bucket(HashMapBucket* bucket, void(*free_callback)(void*))
 
 void hash_map_free(HashMap* map, void(*free_callback)(void*))
 {
-    for (int i = 0; i < map->capacity; ++i)
+    for (size_t i = 0; i < map->capacity; ++i)
     {
         HashMapBucket* bucket = map->buckets[i];
         if (bucket) hash_map_free_bucket(bucket, free_callback);

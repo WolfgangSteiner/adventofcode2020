@@ -26,7 +26,7 @@ Range binary_division(Range range, int division)
 int compute_row(const char* code)
 {
     Range range = { 0, 127 };
-    for (int i = 0; i < strlen(code); ++i)
+    for (size_t i = 0; i < strlen(code); ++i)
     {
         int division = code[i] == 'F' ? 0 : 1;
         range = binary_division(range, division);
@@ -42,7 +42,7 @@ int compute_column(const char* code)
 {
     Range range = { 0, 7 };
     const char* column_code = code + 7;
-    for (int i = 0; i < strlen(column_code); ++i)
+    for (size_t i = 0; i < strlen(column_code); ++i)
     {
         int division = column_code[i] == 'L' ? 0 : 1;
         range = binary_division(range, division);
@@ -126,7 +126,7 @@ int find_free_id(int_array* array)
     int_array_print(array);
     int last_id = 0;
 
-    for (int i = 0; i < array->size; ++i)
+    for (size_t i = 0; i < array->size; ++i)
     {
         const int current_id = array->values[i];
         if (last_id == 0)
@@ -147,7 +147,7 @@ int find_free_id(int_array* array)
     return 0;
 }
 
-int main(int argc, char** argv)
+int main()
 {
     test_binary_division();
     test_compute_row();
