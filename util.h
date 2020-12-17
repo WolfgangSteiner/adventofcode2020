@@ -15,7 +15,7 @@ typedef struct
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MImplies(a, b) assert(((a) && (b)) || !(a))
-
+#define MUnused(A) (void)(A)
 void int_array_delete(int_array* array);
 int_array* int_array_new();
 void int_array_free(int_array* array);
