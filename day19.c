@@ -125,16 +125,12 @@ void intarr_print(intarr_t* arr)
 
 typedef struct s_automaton_t
 {
-    char* substr;
-    char* prev_str;
     size_t num_sub_nodes;
     int id;
     struct s_automaton_t* sub_nodes[2];
-    char* sub_results[2];
     struct s_automaton_t* parent;
     struct s_automaton_t* next_node;
     char match_char;
-    size_t loop_count;
 } automaton_t;
 
 
@@ -153,7 +149,6 @@ char* automaton_match_char(automaton_t* a, char* str)
 
 char* automaton_check_string(automaton_t* a, char* str)
 {
-    //printf("Entering %d with %s\n", a->id, str);
     if (str == 0) return NULL;
     
     if (a->match_char)
@@ -168,7 +163,6 @@ char* automaton_check_string(automaton_t* a, char* str)
             if (a->next_node)
             {
                 char* result = automaton_check_string(a->next_node, pos);
-                //printf("Returning to %d with %s\n", a->id, result);
                 return result;
             }
             else
@@ -182,30 +176,28 @@ char* automaton_check_string(automaton_t* a, char* str)
         assert(a->num_sub_nodes);
 
         if (str == 0) return NULL;
-        char* first_result = NULL;
-        char* second_result = NULL;
+        char* sub_results[2];
 
         for (size_t i = 0; i < a->num_sub_nodes ; i++)
         {
-            a->sub_results[i] = automaton_check_string(a->sub_nodes[i], str);
-            //printf("Returning to %d with %s\n", a->id, a->sub_results[i]);
+            sub_results[i] = automaton_check_string(a->sub_nodes[i], str);
         }
+
 
         if (a->next_node)
         {
             for (size_t i = 0; i < a->num_sub_nodes; i++)
             {
-                a->sub_results[i] = automaton_check_string(a->next_node, a->sub_results[i]);
-                //printf("Returning to %d with %s\n", a->id, a->sub_results[i]);
+                sub_results[i] = automaton_check_string(a->next_node, sub_results[i]);
             }
-
         }
+
 
         for (size_t i = 0; i < a->num_sub_nodes; i++)
         {
-            if (a->sub_results[i])
+            if (sub_results[i])
             {
-                return a->sub_results[i];
+                return sub_results[i];
             }
         }
 
@@ -347,6 +339,20 @@ problem_t* parse_input(const char* file_name)
     return p;
 }
 
+size_t automaton_depth(automaton_t* a)
+{
+    size_t result = 1;
+
+    while (a->parent && a->parent->id != 0)
+    {
+        result += 1;
+        a = a->parent;
+    }
+    
+    printf("automaton depth %d\n", (int)result);
+    return result;
+}
+
 
 automaton_t* compile_regex(problem_t* p, rule_t* rule, automaton_t* parent)
 {
@@ -388,7 +394,6 @@ automaton_t* compile_regex(problem_t* p, rule_t* rule, automaton_t* parent)
                     {
                         *ptr = a;
                     }
-
                 }
                 else
                 {
@@ -436,7 +441,7 @@ void update_problem_part_two(problem_t* p)
 
     rule_t* rule11 = p->rules[11];
     rule11->num_sub_rules = 2;
-    rule11->sub_rules[1] = intarr_init(3);
+    rule11->sub_rules[1] = intarr_init(8);
     intarr_push(rule11->sub_rules[1], 42);
     intarr_push(rule11->sub_rules[1], 11);
     intarr_push(rule11->sub_rules[1], 31);
@@ -548,6 +553,18 @@ void test_compile_regex()
     TEST_ASSERT_EQUAL(4, a->sub_nodes[0]->id);
     TEST_ASSERT_EQUAL(1, a->sub_nodes[0]->next_node->id);
     TEST_ASSERT_EQUAL(5, a->sub_nodes[0]->next_node->next_node->id);
+
+    p = parse_input("day19_test2.txt");
+    update_problem_part_two(p);
+    a = compile_regex(p, p->rules[0], NULL);
+    TEST_ASSERT_EQUAL(a->id, 0);
+    TEST_ASSERT_EQUAL(11, a->sub_nodes[0]->next_node->id);
+    automaton_t* first_node11 = a->sub_nodes[0]->next_node;
+    TEST_ASSERT_EQUAL(NULL, first_node11->next_node);
+    automaton_t* second_node11 = first_node11->sub_nodes[1]->next_node;
+    TEST_ASSERT_EQUAL(11, second_node11->id);
+    TEST_ASSERT_EQUAL(31, second_node11->next_node->id);
+    TEST_ASSERT_EQUAL(second_node11, second_node11->sub_nodes[1]->next_node);
 }
 
 void test_check_string()
@@ -561,6 +578,25 @@ void test_check_string()
     TEST_ASSERT_FALSE(check_string(a, p->input->data[4]));
 }
 
+void test_check_string_part_two()
+{
+    problem_t* p = parse_input("day19_test2.txt");
+    update_problem_part_two(p);
+    automaton_t* a = compile_regex(p, p->rules[0], NULL);
+    //TEST_ASSERT_TRUE(check_string(a, "bbabbbbaabaabba"));
+    //TEST_ASSERT_TRUE(check_string(a, "babbbbaabbbbbabbbbbbaabaaabaaa"));
+    //TEST_ASSERT_TRUE(check_string(a, "aaabbbbbbaaaabaababaabababbabaaabbababababaaa"));
+    printf("==============================================================\n");
+    TEST_ASSERT_TRUE(check_string(a, "bbbbbbbaaaabbbbaaabbabaaa"));
+    //TEST_ASSERT_TRUE(check_string(a, "bbbababbbbaaaaaaaabbababaaababaabab"));
+    //TEST_ASSERT_TRUE(check_string(a, "ababaaaaaabaaab"));
+    //TEST_ASSERT_TRUE(check_string(a, "ababaaaaabbbaba"));
+    //TEST_ASSERT_TRUE(check_string(a, "baabbaaaabbaaaababbaababb"));
+    //TEST_ASSERT_TRUE(check_string(a, "abbbbabbbbaaaababbbbbbaaaababb"));
+    //TEST_ASSERT_TRUE(check_string(a, "aaaaabbaabaaaaababaa"));
+    //TEST_ASSERT_TRUE(check_string(a, "aaaabbaabbaaaaaaabbbabbbaaabbaabaaa"));
+    //TEST_ASSERT_TRUE(check_string(a, "aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba"));
+}
 
 void test_count_valid_strings_part_one()
 {
@@ -582,17 +618,19 @@ void test_count_valid_strings_part_two()
 int main()
 {
     UNITY_BEGIN();
-    RUN_TEST(test_skip_whitespace);
-    RUN_TEST(test_parse_input);
-    RUN_TEST(test_compile_regex);
-    RUN_TEST(test_check_string);
-    RUN_TEST(test_count_valid_strings_part_one);
-    RUN_TEST(test_count_valid_strings_part_two);
+   // RUN_TEST(test_skip_whitespace);
+  //  RUN_TEST(test_parse_input);
+  //  RUN_TEST(test_compile_regex);
+  //  RUN_TEST(test_check_string);
+    RUN_TEST(test_check_string_part_two);
+  //  RUN_TEST(test_count_valid_strings_part_one);
+  //  RUN_TEST(test_count_valid_strings_part_two);
     UNITY_END();
 
     problem_t* p = parse_input("day19.txt");
+    update_problem_part_two(p);
     size_t result_part_one = count_valid_strings(p);
-    printf("Result Part 1: %lu\n", result_part_one);
+    printf("Result Part 2: %lu\n", result_part_one);
 
 
     return 0;
