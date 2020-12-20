@@ -36,7 +36,7 @@ strarr_t* strarr_init()
 
 void strarr_free(strarr_t* arr)
 {
-    for (size_t i = 0; i < arr->size; ++i)
+    for (size_t i = 0; i < arr->size; i++)
     {
         free(arr->data[i]);
     }
@@ -146,63 +146,65 @@ char* automaton_match_char(automaton_t* a, char* str)
     return str[0] == a->match_char ? str + 1 : NULL;
 }
 
+char* automaton_check_string(automaton_t* a, char* str);
+
+
+strarr_t* automaton_process_next(automaton_t* a, strarr_t* input)
+{
+    strarr_t* output = strarr_init();
+    for (size_t i = 0; i < input->size; i++)
+    {
+        char* result = automaton_check_string(a->next_node, input->data[i]);
+        if (result) strarr_push(output, result);
+    } 
+
+    strarr_free(input);
+        
+    return output;
+}
+
 
 char* automaton_check_string(automaton_t* a, char* str)
 {
-    if (str == 0) return NULL;
-    
-    if (a->match_char)
+    strarr_t* results = strarr_init();
+    strarr_free(results); 
+    results = strarr_init();
+
+    if (str == NULL)
+    {
+    }
+    else if (a->match_char)
     {
         char* pos = automaton_match_char(a, str);
-        if (pos == 0)
-        {
-            return NULL;
-        }
-        else 
-        {
-            if (a->next_node)
-            {
-                char* result = automaton_check_string(a->next_node, pos);
-                return result;
-            }
-            else
-            {
-                return pos;
-            }
-        }
+        if (pos) strarr_push(results, pos);
     }
     else
     {
-        assert(a->num_sub_nodes);
-
-        if (str == 0) return NULL;
-        char* sub_results[2];
-
         for (size_t i = 0; i < a->num_sub_nodes ; i++)
         {
-            sub_results[i] = automaton_check_string(a->sub_nodes[i], str);
+            char* result = automaton_check_string(a->sub_nodes[i], str);
+            if (result) strarr_push(results, result);
         }
-
-
-        if (a->next_node)
-        {
-            for (size_t i = 0; i < a->num_sub_nodes; i++)
-            {
-                sub_results[i] = automaton_check_string(a->next_node, sub_results[i]);
-            }
-        }
-
-
-        for (size_t i = 0; i < a->num_sub_nodes; i++)
-        {
-            if (sub_results[i])
-            {
-                return sub_results[i];
-            }
-        }
-
-        return NULL;
     }
+
+    if (a->next_node)
+    {
+        results = automaton_process_next(a, results);
+    }
+
+    char* result_str = NULL;
+
+    for (size_t i = 0; i < results->size; i++)
+    {
+        if (results->data[i])
+        {
+            result_str = results->data[i];
+            break;
+        }
+    }
+
+    strarr_free(results);
+    return result_str;
 }
 
 char* skip_whitespace(char* pos)
@@ -615,13 +617,21 @@ void test_count_valid_strings_part_two()
     TEST_ASSERT_EQUAL(12, count_valid_strings(p));
 }
 
+void test_strarr()
+{
+    strarr_t* arr = strarr_init();
+    strarr_free(arr);
+}
+
+
 int main()
 {
     UNITY_BEGIN();
+    RUN_TEST(test_strarr);
    // RUN_TEST(test_skip_whitespace);
   //  RUN_TEST(test_parse_input);
   //  RUN_TEST(test_compile_regex);
-  //  RUN_TEST(test_check_string);
+    RUN_TEST(test_check_string);
     RUN_TEST(test_check_string_part_two);
   //  RUN_TEST(test_count_valid_strings_part_one);
   //  RUN_TEST(test_count_valid_strings_part_two);
