@@ -5,7 +5,6 @@
 #include <assert.h>
 #include "util.h"
 
-
 void setUp()
 {
 }
@@ -16,7 +15,7 @@ void tearDown()
 }
 
 
-int main(int argc, char** argv)
+int main()
 {
     UNITY_BEGIN();
     UNITY_END();

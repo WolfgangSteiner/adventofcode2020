@@ -196,3 +196,25 @@ void remove_array_elements(
         *size -= num_elements_to_delete;
     }
 }
+
+void swap_u32(u32* pa, u32* pb)
+{
+    u32 c = *pa;
+    *pa = *pb;
+    *pb = c;
+}
+
+void swap_bool(bool* pa, bool* pb)
+{
+    bool c = *pa;
+    *pa = *pb;
+    *pb = c;
+}
+
+void swap_u8(u8* pa, u8* pb)
+{
+    u8 c = *pa;
+    *pa = *pb;
+    *pb = c;
+}
+

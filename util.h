@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
+#include "basetypes.h"
 
 typedef struct
 {
@@ -37,5 +38,9 @@ void remove_array_elements(
 
 
 int chomp(char* str);
+
+void swap_u32(u32* pa, u32* pb);
+void swap_bool(bool* pa, bool* pb);
+void swap_u8(u8* pa, u8* pb);
 
 #endif

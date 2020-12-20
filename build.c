@@ -46,14 +46,16 @@ int main(int argc, char** argv)
     char cmd[1024];
     system("mkdir -p bin");
 
-    const char* src_files = "Unity/src/unity.c util.c hash_map.c hash_map_int.c stack.c";
+    const char* src_files = "Unity/src/unity.c util.c hash_map.c hash_map_int.c stack.c "
+        "bitmap.c dynarr.c";
 
     const char* build_options = args->debug ? "-g" : "-O3";
     const char* warnings = "-Wall -Werror -Wextra";
     const char* include_dirs = "-IUnity/src";
+    const char* link_libraries = "-lm";
     int result = 1;
-    snprintf(cmd, 1024, "gcc %s %s %s -o bin/%s %s.c %s",
-            build_options, warnings, include_dirs, args->file_name, args->file_name, src_files);
+    snprintf(cmd, 1024, "gcc %s %s %s %s -o bin/%s %s.c %s",
+            build_options, warnings, include_dirs, link_libraries, args->file_name, args->file_name, src_files);
 
     while (result)
     {
