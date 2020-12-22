@@ -25,7 +25,6 @@ typedef struct
     intarr_t* player_b;
 } game_t;
 
-static int s_game_number = 0;
 
 game_t* game_init()
 {
@@ -142,19 +141,13 @@ int play_recursive_game(intarr_t* stack_a, intarr_t* stack_b, size_t num_cards_a
 
 int play_recursive_game_round(
     intarr_t* stack_a, intarr_t* stack_b,
-    strarr_t* previous_stacks_a, strarr_t* previous_stacks_b,
-    int round_number,
-    int game_number)
+    strarr_t* previous_stacks_a, strarr_t* previous_stacks_b)
 {
-    printf("Player 1's deck: "); intarr_print(stack_a); 
-    printf("Player 2's deck: "); intarr_print(stack_b);
-
     char* current_deck_str_a = intarr_to_string(stack_a);
     MUnused(previous_stacks_b);
 
     if (strarr_contains(previous_stacks_a, current_deck_str_a))
     {
-        printf("Previous deck detected: %s\n", current_deck_str_a);
         free(current_deck_str_a);
         return 1;
     }
@@ -167,17 +160,13 @@ int play_recursive_game_round(
 
     int card_a = intarr_pop(stack_a);
     int card_b = intarr_pop(stack_b);
-    printf("Player 1 plays %d\n", card_a);
-    printf("Player 2 plays %d\n", card_b);
 
 
     int result = 0;
     
     if (card_a <= (int)stack_a->size && card_b <= (int)stack_b->size)
     {
-        printf("Playing a sub-game to determine the winner...\n");
         result = play_recursive_game(stack_a, stack_b, card_a, card_b);
-        printf("... back to round %d of game %d\n", round_number, game_number);
     }  
     else
     {
@@ -186,13 +175,11 @@ int play_recursive_game_round(
 
     if (result == 1)
     {
-        printf("Player 1 wins round %d of game %d!\n\n", round_number, game_number);
         intarr_push(stack_a, card_a);
         intarr_push(stack_a, card_b);
     }
     else if (result == -1)
     {
-        printf("Player 2 wins round %d of game %d!\n\n", round_number, game_number);
         intarr_push(stack_b, card_b);
         intarr_push(stack_b, card_a);
     }
@@ -216,21 +203,16 @@ intarr_t* copy_stack(intarr_t* stack, size_t num_cards)
 
 int play_recursive_game(intarr_t* stack_a, intarr_t* stack_b, size_t num_cards_a, size_t num_cards_b)
 {
-    printf("====== Game %d =======\n", s_game_number++);
-    int game_number = s_game_number;
     intarr_t* new_stack_a = copy_stack(stack_a, num_cards_a);
     intarr_t* new_stack_b = copy_stack(stack_b, num_cards_b);
     strarr_t* previous_stacks_a = strarr_init();
     strarr_t* previous_stacks_b = strarr_init();
     int result;
-    int round_number = 1;
     while (true)
     {
-        printf("-- Round %d (Game %d) --\n", round_number, game_number);
         result = play_recursive_game_round(
                 new_stack_a, new_stack_b,
-                previous_stacks_a, previous_stacks_b,
-                round_number++, game_number);
+                previous_stacks_a, previous_stacks_b);
         if (result != 0) break;
     }
     intarr_free(new_stack_a);
@@ -247,16 +229,11 @@ size_t play_game_part_two(char* file_name)
     game_t* game = parse_input(file_name);
     strarr_t* previous_stacks_a = strarr_init();
     strarr_t* previous_stacks_b = strarr_init();
-    s_game_number = 1;
-    int game_number = s_game_number;
-    int round_number = 1;
     while (true)
     {
-        printf("-- Round %d (Game %d) --\n", round_number, game_number);
         int result = play_recursive_game_round(
             game->player_a, game->player_b,
-            previous_stacks_a, previous_stacks_b,
-            round_number++, game_number);
+            previous_stacks_a, previous_stacks_b);
         if (result != 0) break;
     }
 
