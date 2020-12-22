@@ -189,3 +189,13 @@ void strarr_remove_any(strarr_t* arr, const strarr_t* of_arr)
 {
     remove_array_elements((void**)arr->data, &arr->size, delete_any_string_callback, of_arr, free);
 }
+
+
+char* strarr_copy_string_at(strarr_t* arr, size_t idx)
+{
+    assert(idx < arr->size);
+    const char* str = arr->data[idx];
+    char* copy = malloc(strlen(str) + 1);
+    strcpy(copy, str);
+    return copy;
+}

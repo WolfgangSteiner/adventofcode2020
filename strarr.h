@@ -24,4 +24,5 @@ void strarr_remove_any(strarr_t* arr, const strarr_t* of_arr);
 strarr_t* strarr_intersect(strarr_t* a, strarr_t* b);
 void strarr_sort(strarr_t* arr);
 char* strarr_join(strarr_t* arr, char* join_str);
+char* strarr_copy_string_at(strarr_t* arr, size_t idx);
 #endif

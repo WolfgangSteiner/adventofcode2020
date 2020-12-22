@@ -17,6 +17,8 @@ typedef struct
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MImplies(a, b) assert(((a) && (b)) || !(a))
 #define MUnused(A) (void)(A)
+#define MInvalid() assert(false);
+
 void int_array_delete(int_array* array);
 int_array* int_array_new();
 void int_array_free(int_array* array);
@@ -28,6 +30,7 @@ int int_array_back(const int_array* array);
 int int_array_at(const int_array* array, size_t index);
 int_array* int_array_read(char* fileName);
 void int_array_print(const int_array* array);
+
 const char* copy_word(char* dst, const char* line);
 
 void remove_array_elements(

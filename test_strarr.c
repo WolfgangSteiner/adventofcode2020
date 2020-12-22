@@ -15,6 +15,16 @@ void tearDown()
 {
 }
 
+
+void test_strarr_init_free()
+{
+    for (size_t i = 0; i < 10000; i++)
+    {
+        strarr_t* arr = strarr_init();
+        strarr_free(arr);
+    }
+}
+
 void test_strarr_sort()
 {
     strarr_t* arr = strarr_init();
@@ -45,6 +55,7 @@ void test_strarr_join()
     TEST_ASSERT_EQUAL_STRING("ccc,zzz,bbb,aaa", join);
 
     strarr_free(arr);
+    free(join);
 }
 
 void test_strarr_remove_any()
@@ -74,6 +85,7 @@ void test_strarr_remove_any()
 int main()
 {
     UNITY_BEGIN();
+    RUN_TEST(test_strarr_init_free);
     RUN_TEST(test_strarr_sort);
     RUN_TEST(test_strarr_join);
     RUN_TEST(test_strarr_remove_any);
