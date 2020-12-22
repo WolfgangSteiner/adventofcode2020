@@ -44,7 +44,7 @@ char* automaton_match_char(automaton_t* a, char* str)
     return str[0] == a->match_char ? str + 1 : NULL;
 }
 
-char* automaton_check_string(automaton_t* a, char* str);
+strarr_t* automaton_check_string(automaton_t* a, char* str);
 
 
 strarr_t* automaton_process_next(automaton_t* a, strarr_t* input)
@@ -52,9 +52,9 @@ strarr_t* automaton_process_next(automaton_t* a, strarr_t* input)
     strarr_t* output = strarr_init();
     for (size_t i = 0; i < input->size; i++)
     {
-        char* result = automaton_check_string(a->next_node, input->data[i]);
-        if (result) strarr_push(output, result);
-        free(result);
+        strarr_t* results = automaton_check_string(a->next_node, input->data[i]);
+        strarr_transfer_strings(output, results);
+        strarr_free(results);
     } 
 
     strarr_free(input);
@@ -63,7 +63,7 @@ strarr_t* automaton_process_next(automaton_t* a, strarr_t* input)
 }
 
 
-char* automaton_check_string(automaton_t* a, char* str)
+strarr_t* automaton_check_string(automaton_t* a, char* str)
 {
     strarr_t* results = strarr_init();
 
@@ -79,9 +79,9 @@ char* automaton_check_string(automaton_t* a, char* str)
     {
         for (size_t i = 0; i < a->num_sub_nodes ; i++)
         {
-            char* result = automaton_check_string(a->sub_nodes[i], str);
-            if (result) strarr_push(results, result);
-            free(result);
+            strarr_t* sub_results = automaton_check_string(a->sub_nodes[i], str);
+            strarr_transfer_strings(results, sub_results);
+            free(sub_results);
         }
     }
 
@@ -90,20 +90,9 @@ char* automaton_check_string(automaton_t* a, char* str)
         results = automaton_process_next(a, results);
     }
 
-    char* result_str = NULL;
-
-    for (size_t i = 0; i < results->size; i++)
-    {
-        if (results->data[i])
-        {
-            result_str = strarr_copy_string_at(results, i);
-            break;
-        }
-    }
-
-    strarr_free(results);
-    return result_str;
+    return results;
 }
+
 
 char* skip_whitespace(char* pos)
 {
@@ -111,6 +100,7 @@ char* skip_whitespace(char* pos)
     while (isspace(*pos)) pos++;
     return (*pos == '\0') ? NULL : pos;
 }
+
 
 typedef struct 
 {
@@ -312,8 +302,20 @@ automaton_t* compile_regex(problem_t* p, rule_t* rule, automaton_t* parent)
 
 bool check_string(automaton_t* a, char* str)
 {
-    char* result = automaton_check_string(a, str);
-    return result != NULL && *result == 0;
+    strarr_t* results = automaton_check_string(a, str);
+    
+    bool result = false;
+    for (size_t i = 0; i < results->size; ++i)
+    {
+        if (strlen(results->data[i]) == 0)
+        {
+            result = true;
+        }
+    }
+
+    strarr_free(results);
+
+    return result;
 }
 
 

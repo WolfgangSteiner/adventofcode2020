@@ -39,14 +39,19 @@ strarr_t* strarr_copy(strarr_t* arr)
 }
 
 
+static void strarr_check_resize(strarr_t* arr)
+{
+    if (arr->size == arr->alloc_size)
+    {
+        arr->alloc_size *= 2;
+        arr->data = realloc(arr->data, sizeof(char*) * arr->alloc_size);
+    }
+}
+
+
 char* strarr_alloc_str(strarr_t* strarr, size_t size)
 {
-    if (strarr->size == strarr->alloc_size)
-    {
-        strarr->alloc_size *= 2;
-        strarr->data = realloc(strarr->data, sizeof(char*) * strarr->alloc_size);
-    }
-
+    strarr_check_resize(strarr);
     char** bucket = &strarr->data[strarr->size++];
     *bucket = malloc(size);
     return *bucket;
@@ -57,6 +62,24 @@ void strarr_push(strarr_t* strarr, const char* str)
 {
     char* bucket = strarr_alloc_str(strarr, strlen(str) + 1);
     strcpy(bucket, str);
+}
+
+
+void strarr_push_transfer(strarr_t* arr, char* str)
+{
+    strarr_check_resize(arr);
+    arr->data[arr->size++] = str; 
+}
+
+
+void strarr_transfer_strings(strarr_t* dst, strarr_t* src)
+{
+    for (size_t i = 0; i < src->size; i++)
+    {
+        strarr_push_transfer(dst, src->data[i]);
+    }
+
+    src->size = 0;
 }
 
 

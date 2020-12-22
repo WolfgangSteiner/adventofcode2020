@@ -13,9 +13,16 @@ typedef struct
 strarr_t* strarr_init();
 strarr_t* strarr_init_with_size(size_t alloc_size);
 void strarr_free(strarr_t* arr);
+
 strarr_t* strarr_copy(strarr_t* arr);
+
 char* strarr_alloc_str(strarr_t* strarr, size_t size);
 void strarr_push(strarr_t* strarr, const char* str);
+
+// @brief Push a string into the array and transfer ownership.
+void strarr_push_transfer(strarr_t* strarr, char* str);
+
+
 void strarr_clear(strarr_t* arr);
 bool strarr_contains(const strarr_t* arr, const char* str);
 char* strarr_at(strarr_t* arr, size_t idx);
@@ -25,4 +32,8 @@ strarr_t* strarr_intersect(strarr_t* a, strarr_t* b);
 void strarr_sort(strarr_t* arr);
 char* strarr_join(strarr_t* arr, char* join_str);
 char* strarr_copy_string_at(strarr_t* arr, size_t idx);
+
+// @brief Transfer ownership of strings from src to dst.
+// @post dst contains all strings, src is empty.
+void strarr_transfer_strings(strarr_t* dst, strarr_t* src);
 #endif
