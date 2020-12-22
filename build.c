@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     system("mkdir -p bin");
 
     const char* src_files = "Unity/src/unity.c util.c hash_map.c hash_map_int.c stack.c "
-        "bitmap.c dynarr.c";
+        "bitmap.c dynarr.c strarr.c";
 
     const char* build_options = args->debug ? "-g" : "-O3";
     const char* warnings = "-Wall -Werror -Wextra";

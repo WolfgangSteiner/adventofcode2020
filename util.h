@@ -34,7 +34,8 @@ void remove_array_elements(
     void** array,
     size_t* size,
     bool(*should_delete_callback)(const void*, const void*),
-    const void* user_data);
+    const void* user_data,
+    void(*deallocator)(void*));
 
 
 int chomp(char* str);

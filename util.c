@@ -161,7 +161,8 @@ void remove_array_elements(
     void** array,
     size_t* size,
     bool(*should_delete_callback)(const void*, const void*),
-    const void* user_data)
+    const void* user_data,
+    void(*deallocator)(void*))
 {
     size_t start_idx = 0;
     size_t end_idx = start_idx;
@@ -181,6 +182,11 @@ void remove_array_elements(
 
         while (should_delete_callback(array[end_idx], user_data))
         {
+            if (deallocator)
+            {
+                deallocator(array[end_idx]);
+            }
+
             end_idx++;
             if (end_idx == *size)
             {

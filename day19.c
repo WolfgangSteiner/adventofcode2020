@@ -6,7 +6,7 @@
 #include "util.h"
 #include "hash_map.h"
 #include "ctype.h"
-
+#include "strarr.h"
 
 void setUp()
 {
@@ -17,53 +17,6 @@ void tearDown()
 {
 }
 
-
-typedef struct
-{
-    size_t size;
-    size_t alloc_size;
-    char** data;
-} strarr_t;
-
-
-strarr_t* strarr_init()
-{
-    strarr_t* strarr = calloc(1, sizeof(strarr_t));
-    strarr->alloc_size = 16;
-    strarr->data = malloc(sizeof(char*) * strarr->alloc_size);
-    return strarr;
-}
-
-void strarr_free(strarr_t* arr)
-{
-    for (size_t i = 0; i < arr->size; i++)
-    {
-        free(arr->data[i]);
-    }
-    free(arr->data);
-    free(arr);
-}
-
-
-char* strarr_alloc_str(strarr_t* strarr, size_t size)
-{
-    if (strarr->size == strarr->alloc_size)
-    {
-        strarr->alloc_size *= 2;
-        strarr->data = realloc(strarr->data, sizeof(char*) * strarr->alloc_size);
-    }
-
-    char** bucket = &strarr->data[strarr->size++];
-    *bucket = malloc(size);
-    return *bucket;
-}
-
-
-void strarr_push(strarr_t* strarr, const char* str)
-{
-    char* bucket = strarr_alloc_str(strarr, strlen(str) + 1);
-    strcpy(bucket, str);
-}
 
 
 typedef struct

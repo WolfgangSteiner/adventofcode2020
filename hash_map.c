@@ -198,3 +198,33 @@ void* hash_map_iterator_get_value(const HashMapIterator* iter)
     return iter->bucket->value;
 }
 
+
+strarr_t* hash_map_get_keys(HashMap* map)
+{
+    strarr_t* result = strarr_init_with_size(map->size);
+    HashMapIterator* iter = hash_map_iterator_begin(map);
+    
+    while (!hash_map_iterator_is_end(iter))
+    {
+        strarr_push(result, hash_map_iterator_get_key(iter));
+        hash_map_iterator_next(iter);
+    }
+
+    free(iter);
+    return result;
+}
+
+void* hash_map_get_value(HashMap* map, const char* key)
+{
+    HashMapIterator* iter = hash_map_find(map, key);
+    void* result = NULL;
+    if (!hash_map_iterator_is_end(iter))
+    {
+        result = hash_map_iterator_get_value(iter);
+    }
+
+    free(iter);
+
+    return result;
+}
+
