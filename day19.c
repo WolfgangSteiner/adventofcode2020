@@ -7,6 +7,7 @@
 #include "hash_map.h"
 #include "ctype.h"
 #include "strarr.h"
+#include "intarr.h"
 
 void setUp()
 {
@@ -19,62 +20,6 @@ void tearDown()
 
 
 
-typedef struct
-{
-    size_t size;
-    size_t alloc_size;
-    int* data;
-}intarr_t;
-
-
-intarr_t* intarr_init(size_t initial_alloc_size)
-{
-    intarr_t* arr = calloc(1, sizeof(intarr_t));
-    arr->alloc_size = initial_alloc_size;
-    arr->data = malloc(initial_alloc_size * sizeof(int));
-    return arr;
-}    
-
-void intarr_free(intarr_t* arr)
-{
-    free(arr->data);
-    free(arr);
-}
-
-
-void intarr_push(intarr_t* arr, int value)
-{
-    if (arr->size == arr->alloc_size)
-    {
-        arr->alloc_size *= 2;
-        arr->data = realloc(arr->data, arr->alloc_size * sizeof(int));
-    }
-
-    arr->data[arr->size++] = value;
-}
-
-void intarr_clear(intarr_t* arr)
-{
-    arr->size = 0;
-}
-
-
-int* intarr_at(intarr_t* arr, size_t index)
-{
-    assert(index < arr->size);
-    return &arr->data[index];
-}
-
-
-void intarr_print(intarr_t* arr)
-{
-    for (size_t i = 0; i < arr->size; ++i)
-    {
-        printf("%d ", *intarr_at(arr, i));
-    }
-
-    printf("\n");
-}
 
 typedef struct s_automaton_t
 {
@@ -109,6 +54,7 @@ strarr_t* automaton_process_next(automaton_t* a, strarr_t* input)
     {
         char* result = automaton_check_string(a->next_node, input->data[i]);
         if (result) strarr_push(output, result);
+        free(result);
     } 
 
     strarr_free(input);
@@ -120,8 +66,6 @@ strarr_t* automaton_process_next(automaton_t* a, strarr_t* input)
 char* automaton_check_string(automaton_t* a, char* str)
 {
     strarr_t* results = strarr_init();
-    strarr_free(results); 
-    results = strarr_init();
 
     if (str == NULL)
     {
@@ -137,6 +81,7 @@ char* automaton_check_string(automaton_t* a, char* str)
         {
             char* result = automaton_check_string(a->sub_nodes[i], str);
             if (result) strarr_push(results, result);
+            free(result);
         }
     }
 
@@ -151,7 +96,7 @@ char* automaton_check_string(automaton_t* a, char* str)
     {
         if (results->data[i])
         {
-            result_str = results->data[i];
+            result_str = strarr_copy_string_at(results, i);
             break;
         }
     }
@@ -172,13 +117,14 @@ typedef struct
     char match_char;
     int id;
     size_t num_sub_rules;
-    intarr_t* sub_rules[0];
+    intarr_t* sub_rules[2];
 }rule_t;
 
 
 rule_t* rule_init(char* str)
 {
     rule_t* r = calloc(1, sizeof(rule_t));
+    
     char* pos = str;
 
     r->id = atoi(pos);
