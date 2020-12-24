@@ -3,6 +3,8 @@
 #include <assert.h>
 #include "stdio.h"
 #include "string.h"
+#include <limits.h>
+#include "util.h"
 
 intarr_t* intarr_init(size_t initial_alloc_size)
 {
@@ -114,3 +116,13 @@ char* intarr_to_string(const intarr_t* arr)
 }
 
 
+int intarr_max(const intarr_t* arr)
+{
+    int max = INT_MIN;
+    for (size_t i = 0; i < arr->size; ++i)
+    {
+        max = MAX(max, arr->data[i]);
+    }
+
+    return max;
+}

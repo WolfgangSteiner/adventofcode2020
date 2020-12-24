@@ -3,6 +3,7 @@
 #include <string.h>
 #include "util.h"
 
+
 strarr_t* strarr_init()
 {
     return strarr_init_with_size(16);
@@ -222,3 +223,5 @@ char* strarr_copy_string_at(strarr_t* arr, size_t idx)
     strcpy(copy, str);
     return copy;
 }
+
+

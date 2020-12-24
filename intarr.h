@@ -23,4 +23,6 @@ void intarr_print(intarr_t* arr);
 bool intarr_contains(intarr_t* arr, int value);
 char* intarr_to_string(const intarr_t* arr);
 
+int intarr_max(const intarr_t* arr);
+
 #endif
